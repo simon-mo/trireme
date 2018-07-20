@@ -1,9 +1,5 @@
-# Galleon
+# Trireme
 
-A websocket based training/inference server.
+A websocket based training/inference server. Flexible asyncio based server.
 
-[Wikipedia](https://en.wikipedia.org/wiki/Galleon)
-
-- Not Fast as Clipper
-- Not Compositional as "Armada"
-- Heavy & Slow but Powerful
+![Trimeme](https://cdn.britannica.com/668x448/70/185470-004-DE86BA21.jpg)

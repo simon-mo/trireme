@@ -8,7 +8,11 @@ name = "pypi"
 [packages]
 
 websockets = "*"
+trio = "*"
 
 
 [dev-packages]
 
+pylint = "*"
+torch = "*"
+black = "*"
