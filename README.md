@@ -12,3 +12,7 @@
 3. Inside of virtualenv, run:
     - `python app.py` will start the trireme server. 
     - `python test.py [interval]` will start sending requests. You can specify shorter interval in seconds for simulate real work load. 
+
+
+## API
+Checkout `API.md`
