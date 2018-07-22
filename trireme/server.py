@@ -60,4 +60,3 @@ def get_server(
     start_server_co = websockets.serve(connection_handler, ip, port)
 
     return start_server_co, req_queue, resp_queue
-

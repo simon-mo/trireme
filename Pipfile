@@ -9,6 +9,7 @@ name = "pypi"
 
 websockets = "*"
 trio = "*"
+redis = "*"
 
 
 [dev-packages]

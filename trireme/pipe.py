@@ -1,9 +1,23 @@
 import asyncio
-from server import get_server, QUEUE_MAX_SIZE
+from .server import get_server, QUEUE_MAX_SIZE
 from functools import partial
 
 
-async def pipe_factory(req_queue, resp_queue, async_func, args, kwargs):
+def sanitize_batch(batch):
+    sanitized = []
+    for m in batch:
+        if not isinstance(m, dict):
+            sanitized.append(m)
+            continue
+        s = m.copy()
+        if "input" in s and s["input"] is not None:
+            s["input"] = f"length {len(s['input'])} bytes"
+        sanitized.append(s)
+    return sanitized
+
+
+async def pipe_factory(req_queue, resp_queue, actor_cls, args, kwargs):
+    actor = actor_cls(*args, **kwargs)
     while True:
         if req_queue.empty():
             await asyncio.sleep(0.1)
@@ -14,20 +28,20 @@ async def pipe_factory(req_queue, resp_queue, async_func, args, kwargs):
             msg = await req_queue.get()
             msg_batch.append(msg)
 
-        print(f"recieved msg_batch {msg_batch}")
+        # print(f"recieved msg_batch {sanitize_batch(msg_batch)}")
         # Inference/Training Code
-        print("Executing", async_func, args, kwargs)
-        results = await async_func(msg_batch, *args, **kwargs)
-
+        # print("Executing", actor)
+        results = await actor(msg_batch)
+        # print("Results", sanitize_batch(results))
+        # print()
         for result in results:
             await resp_queue.put(result)
+
 
 class Pipe(object):
     @classmethod
     def new(cls, func, *args, **kwargs):
-        return Pipe(
-            partial(pipe_factory, async_func=func, args=args, kwargs=kwargs)
-        )
+        return Pipe(partial(pipe_factory, actor_cls=func, args=args, kwargs=kwargs))
 
     def __init__(self, func_or_queue):
         self.is_func = False
@@ -56,7 +70,7 @@ class Pipe(object):
             self.handle_func_to_queue(other)
         else:
             raise NotImplementedError("Do not support queue to queue chaining")
-        
+
         return other
 
     def handle_queue_to_func(self, func):

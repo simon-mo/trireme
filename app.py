@@ -1,23 +1,23 @@
 import asyncio
-from server import get_server
-from pipe import Pipe, pipe_factory
+from trireme.server import get_server
+from trireme.pipe import Pipe, pipe_factory
+from trireme.examples.mnist import MnistTrainActor
+from trireme.middlewares import RedisDownloaderActor, JsonDumpsActor, JsonLoadsActor
 
 loop = asyncio.get_event_loop()
 server, req_queue, resp_queue = get_server()
 
+loads = Pipe.new(JsonLoadsActor)
+redis = Pipe.new(RedisDownloaderActor)
+mnist = Pipe.new(MnistTrainActor)
+dumps = Pipe.new(JsonDumpsActor)
 
-async def hi(inp_batch, tag):
-    print(tag, f"len {len(inp_batch)}")
-    return inp_batch
+Pipe(req_queue) > loads > redis > mnist > dumps > Pipe(resp_queue)
 
+loads = loads.get()
+redis = redis.get()
+mnist = mnist.get()
+dumps = dumps.get()
 
-one = Pipe.new(hi, tag="one")
-two = Pipe.new(hi, tag="two")
-
-Pipe(req_queue) > one > two > Pipe(resp_queue)
-
-one = one.get()
-two = two.get()
-
-loop.run_until_complete(asyncio.gather(server, one(), two()))
+loop.run_until_complete(asyncio.gather(server, redis(), mnist(), loads(), dumps()))
 loop.run_forever()
