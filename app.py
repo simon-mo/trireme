@@ -4,6 +4,11 @@ from trireme.pipe import Pipe, pipe_factory
 from trireme.examples.mnist import MnistTrainActor
 from trireme.middlewares import RedisDownloaderActor, JsonDumpsActor, JsonLoadsActor
 
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+logger = logging.getLogger(__name__)
+
+
 loop = asyncio.get_event_loop()
 server, req_queue, resp_queue = get_server()
 

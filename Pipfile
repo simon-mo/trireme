@@ -8,8 +8,6 @@ name = "pypi"
 [packages]
 
 websockets = "*"
-trio = "*"
-redis = "*"
 
 
 [dev-packages]
@@ -17,3 +15,6 @@ redis = "*"
 pylint = "*"
 torch = "*"
 black = "*"
+redis = "*"
+numpy = "*"
+torchvision = "*"

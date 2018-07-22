@@ -9,16 +9,22 @@ from functools import partial
 
 QUEUE_MAX_SIZE = 10000
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 async def consumer_handler_factory(websocket, path, req_queue):
     while True:
         message = await websocket.recv()
+        # logging.info(f"\nReceived Input {message}")
         await req_queue.put(message)
 
 
 async def producer_handler_factory(websocket, path, resp_queue):
     while True:
         message = await resp_queue.get()
+        # logging.info(f"Sending Output {message}\n")
         await websocket.send(message)
 
 

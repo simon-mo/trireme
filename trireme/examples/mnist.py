@@ -7,6 +7,9 @@ from torchvision import datasets, transforms
 import numpy as np
 import asyncio
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MNISTNet(nn.Module):
@@ -51,7 +54,6 @@ class MnistTrainActor:
         self.criterion = nn.MSELoss()
 
     async def __call__(self, input_batch):
-        print(f"MNIST Process {len(input_batch)}")
         # Routing logic
         # There will be four batches
         cancel_batch = []
@@ -71,6 +73,13 @@ class MnistTrainActor:
             elif inp["path"] == "cancel":
                 if int(inp["model state id"]) == self.model_state_id:
                     cancel_batch.append(inp)
+
+        batch_info = f"""
+        Cancel {len(cancel_batch)};
+        Re-forward {len(re_forward_batch)};
+        Backward {len(backward_batch)};
+        Forward {len(new_forward_batch)}"""
+        logger.info(f"MNIST NN is processing {batch_info}")
 
         self._handle_cancel(cancel_batch)
         self._handle_forward(re_forward_batch)

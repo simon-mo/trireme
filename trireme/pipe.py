@@ -28,12 +28,8 @@ async def pipe_factory(req_queue, resp_queue, actor_cls, args, kwargs):
             msg = await req_queue.get()
             msg_batch.append(msg)
 
-        # print(f"recieved msg_batch {sanitize_batch(msg_batch)}")
-        # Inference/Training Code
-        # print("Executing", actor)
         results = await actor(msg_batch)
-        # print("Results", sanitize_batch(results))
-        # print()
+
         for result in results:
             await resp_queue.put(result)
 
