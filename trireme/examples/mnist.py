@@ -163,6 +163,10 @@ class MnistTrainActor:
 
 
 if __name__ == "__main__":
+    """Sanity Check to make sure the network is working. 
+       For real server example, see test.py
+    """
+    
     data = datasets.MNIST(
         root="data",
         train=True,
