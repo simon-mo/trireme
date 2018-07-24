@@ -7,17 +7,18 @@ import json
 import importlib
 import logging
 import shutil
-
+import asyncio
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
 from tensorboardX import SummaryWriter
-print(os.getcwd())
 from .model.YOLOv3_PyTorch.nets.model_main import ModelMain
 from .model.YOLOv3_PyTorch.nets.yolo_loss import YOLOLoss
 from .model.YOLOv3_PyTorch.common.sat_dataset import SatDataset
+
+logger = logging.getLogger(__name__)
 
 class YoloV3TrainActor:
     def __init__(self):
@@ -33,10 +34,11 @@ class YoloV3TrainActor:
         self.forward_result = {}
         self.model_state_id = 0
         self.criterion = self._get_loss
+        self.images = {}
     
     def _load_net(self, config):
         net = ModelMain(config)
-        net = nn.DataParallel(net)
+        # net = nn.DataParallel(net)
         # net = net.cuda()
         return net
         
@@ -50,7 +52,7 @@ class YoloV3TrainActor:
                 "anchors": [[[116, 90], [156, 198], [373, 326]],
                             [[30, 61], [62, 45], [59, 119]],
                             [[10, 13], [16, 30], [33, 23]]],
-                "classes": 80,
+                "classes": 91,
             },
             "lr": {
                 "backbone_lr": 0.001,
@@ -142,7 +144,9 @@ class YoloV3TrainActor:
                                         self.config["yolo"]["classes"], (self.config["img_w"], self.config["img_h"])))
         losses_name = ["total_loss", "x", "y", "w", "h", "conf", "cls"]
         losses = [[]] * len(losses_name)
+        
         for i in range(3):
+            # print(outputs.shape)  #should be (3, 1, 255, 13, 13), is (1, 1, 288, 13, 13)
             _loss_item = yolo_losses[i](outputs[i], labels)
             for j, l in enumerate(_loss_item):
                 losses[j].append(l)
@@ -183,7 +187,7 @@ class YoloV3TrainActor:
         Re-forward {len(re_forward_batch)};
         Backward {len(backward_batch)};
         Forward {len(new_forward_batch)}"""
-        logger.info(f"MNIST NN is processing {batch_info}")
+        logger.info(f"YOLO NN is processing {batch_info}")
 
         self._handle_cancel(cancel_batch)
         self._handle_forward(re_forward_batch)
@@ -197,35 +201,48 @@ class YoloV3TrainActor:
             self.forward_result.pop(inp["object id"])
 
     def _handle_backward(self, input_batch):
-        if len(input_batch) == 0:
-            return None
-
-        # TODO(simon): tune learning rate according to batch size
-        # TODO(simon): step per n batch size, not every invocation
-
-        # Prepare Batch
-        output_tensors = []
-        target_tensors = []
+        self.config["global_step"] = self.config.get("start_step", 0)
+        
+        imgs = []
+        targets = []
         for inp in input_batch:
-            forward_tensor = self.forward_result[inp["object id"]]
-            forward_tensor = forward_tensor.unsqueeze(0)
-            output_tensors.append(forward_tensor)
-            
-            target = torch.tensor(inp["label"])
-            target_tensors.append(target)
+            img = self.images[inp["object id"]]
+            imgs.append(img)
+            label = inp["label"]
+            labels = []
+            for entry in label:
+                bbox = entry["bbox"]
+                bbox.insert(0, entry["category_id"])
+                labels.append([5, 0.5, 0.5, 0.2, 0.2])
+            targets.append(labels)
+        
 
-        # Batch backward
-        output = torch.cat(output_tensors)
-        target = torch.cat(target_tensors)
-        loss = self.criterion(output, target)
-        loss.backward()
+        # DataLoader
+        dataloader = torch.utils.data.DataLoader(SatDataset(imgs, targets,
+                                                             (self.config["img_w"], self.config["img_h"]),
+                                                             is_training=True),
+                                                 batch_size=self.config["batch_size"],
+                                                 shuffle=True, num_workers=0, pin_memory=True)
+                                                 
+        # Start the training loop
+        for epoch in range(self.config["epochs"]):
+            for step, samples in enumerate(dataloader):
+                images, labels = samples["image"], samples["label"]
+                start_time = time.time()
+                self.config["global_step"] += 1
 
-        self.optimizer.step()
-        self.net.zero_grad()
+                # Forward and backward
+                self.optimizer.zero_grad()
+                outputs = self.net(images)
+                loss = self.criterion(outputs, labels)
+                loss.backward()
+                self.optimizer.step()
 
-        # Clear Cache
+            self.lr_scheduler.step()
+
         self.model_state_id += 1
         self.forward_result = {}
+        self.images = {}
 
     def _handle_forward(self, input_batch):
         if len(input_batch) == 0:
@@ -233,6 +250,7 @@ class YoloV3TrainActor:
 
         # Convert to tensors
         tensors = []
+        np_inputs = []
         for inp in input_batch:
             bytes_input = inp["input"]
 
@@ -241,6 +259,7 @@ class YoloV3TrainActor:
             # - another middleware
             # - trainer
             np_input = np.frombuffer(bytes_input, dtype=np.float32).reshape(3, 416, 416)
+            np_inputs.append(np_input.transpose())
             tensor = torch.Tensor(np_input)
             tensor = tensor.unsqueeze(0)
             tensors.append(tensor)
@@ -252,8 +271,9 @@ class YoloV3TrainActor:
         for i, inp in enumerate(input_batch):
             # cache forward result
             self.forward_result[inp["object id"]] = forward_res[i]
+            self.images[inp["object id"]] = np_inputs[i]
 
-            result = forward_res[i]
+            result = forward_res[i].detach().numpy().tolist()
             returns.append(
                 {
                     "object id": inp["object id"],

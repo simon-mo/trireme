@@ -25,17 +25,17 @@ r = redis.Redis()
 
 oid_start_time = {}
 
-SLEEP_TIME = 1
+SLEEP_TIME = 10
 if len(sys.argv) > 1:
     SLEEP_TIME = float(sys.argv[1])
 
 class YoloGenInputActor:
     def __init__(self):
-        coco_transform = transforms.Compose(
-            [transforms.Resize(416), transforms.ToTensor()]
+        yolo_trans = transforms.Compose(
+            [transforms.Resize((416, 416)), transforms.ToTensor()]
         )
         self.data = datasets.CocoDetection(
-            root="data/val2017", annFile="data/annotations/instances_val2017.json", transform=coco_transform
+            root="data/resized_val2017", annFile="data/annotations/instances_val2017.json", transform=yolo_trans
         )
         self.data_iter = iter(self.data)
         print("YoloGenInputActor init")
@@ -120,13 +120,13 @@ async def feedback_queue_consumer(websocket):
 async def main():
     async with websockets.connect("ws://localhost:8765/") as websocket:
         asyncio.ensure_future(infer_request_producer(websocket))
-        asyncio.sleep(1)
+        asyncio.sleep(SLEEP_TIME)
         
         asyncio.ensure_future(feedback_queue_consumer(websocket))
         asyncio.ensure_future(infer_response_consumer(websocket))
         
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(SLEEP_TIME)
 
 
 r.flushall()

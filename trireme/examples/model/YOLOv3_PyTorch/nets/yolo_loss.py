@@ -3,7 +3,6 @@ import torch.nn as nn
 import numpy as np
 import math
 import os
-print(os.getcwd())
 from ..common.utils import bbox_iou
 
 
@@ -49,9 +48,15 @@ class YOLOLoss(nn.Module):
             mask, noobj_mask, tx, ty, tw, th, tconf, tcls = self.get_target(targets, scaled_anchors,
                                                                            in_w, in_h,
                                                                            self.ignore_threshold)
-            mask, noobj_mask = mask.cuda(), noobj_mask.cuda()
-            tx, ty, tw, th = tx.cuda(), ty.cuda(), tw.cuda(), th.cuda()
-            tconf, tcls = tconf.cuda(), tcls.cuda()
+            use_cuda = False
+            if use_cuda:
+                mask, noobj_mask = mask.cuda(), noobj_mask.cuda()
+                tx, ty, tw, th = tx.cuda(), ty.cuda(), tw.cuda(), th.cuda()
+                tconf, tcls = tconf.cuda(), tcls.cuda()
+            else:
+                mask, noobj_mask = mask  , noobj_mask  
+                tx, ty, tw, th = tx  , ty  , tw  , th  
+                tconf, tcls = tconf  , tcls  
             #  losses.
             loss_x = self.bce_loss(x * mask, tx * mask)
             loss_y = self.bce_loss(y * mask, ty * mask)

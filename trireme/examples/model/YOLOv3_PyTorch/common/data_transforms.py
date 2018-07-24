@@ -16,6 +16,7 @@ class Compose(object):
         self.transforms = transforms
 
     def __call__(self, img):
+        self.transforms = self.transforms[:3] # repeated 3 times?
         for t in self.transforms:
             img = t(img)
         return img
@@ -120,5 +121,5 @@ class ImageBaseAug(object):
     def __call__(self, sample):
         seq_det = self.seq.to_deterministic()
         image, label = sample['image'], sample['label']
-        image = seq_det.augment_images([image])[0]
+        # image = seq_det.augment_images([image])[0]
         return {'image': image, 'label': label}
