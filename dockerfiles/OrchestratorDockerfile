@@ -15,10 +15,15 @@ RUN pip3 install pipenv
 
 COPY Pipfile Pipfile.lock ./
 
+# Address Click installation locale issue
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+
 RUN pipenv install --system --deploy
 
 COPY . .
 
 EXPOSE 9999
 
-CMD ["python", "./orchestrator.py"]
+CMD ["python3", "./orchestrator.py"]
