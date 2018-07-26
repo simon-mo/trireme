@@ -34,7 +34,9 @@ import numpy as np
 
 class MnistGenInputActor:
     def __init__(self):
-        raw = requests.get("https://s3.amazonaws.com/simon-mo-dev-public/index.txt").text
+        raw = requests.get(
+            "https://s3.amazonaws.com/simon-mo-dev-public/index.txt"
+        ).text
         lst = raw.split("\n")
         self.urls = [
             item.strip()
@@ -106,7 +108,9 @@ async def feedback_queue_consumer(websocket):
 
 
 async def main():
-    async with websockets.connect("ws://blaze.millennium.berkeley.edu:44983" or "ws://localhost:8765/") as websocket:
+    async with websockets.connect(
+        "ws://blaze.millennium.berkeley.edu:44983" or "ws://localhost:8765/"
+    ) as websocket:
         asyncio.ensure_future(feedback_queue_consumer(websocket))
         asyncio.ensure_future(infer_response_consumer(websocket))
         asyncio.ensure_future(infer_request_producer(websocket))

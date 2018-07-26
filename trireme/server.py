@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 async def consumer_handler_factory(websocket, path, req_queue):
     while True:
         message = await websocket.recv()
-        if message == 'ping':
+        if message == "ping":
             await websocket.pong()
             continue
         # logging.info(f"\nReceived Input {message}")
@@ -47,11 +47,7 @@ async def connection_handler_factory(
 
 
 def get_server(
-    ip="0.0.0.0",
-    port=8765,
-    req_queue=None,
-    resq_queue=None,
-    queue_size=QUEUE_MAX_SIZE,
+    ip="0.0.0.0", port=8765, req_queue=None, resq_queue=None, queue_size=QUEUE_MAX_SIZE
 ):
     if not req_queue:
         req_queue = asyncio.Queue(maxsize=queue_size)

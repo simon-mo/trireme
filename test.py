@@ -29,6 +29,7 @@ SLEEP_TIME = 1
 if len(sys.argv) > 1:
     SLEEP_TIME = float(sys.argv[1])
 
+
 class MnistGenInputActor:
     def __init__(self):
         mnist_transform = transforms.Compose(
@@ -83,7 +84,9 @@ async def infer_response_consumer(websocket):
         resp_dict = json.loads(resp)
         inp_oid = resp_dict["object id"]
 
-        print(f"Prediction {inp_oid} took {time.time() - oid_start_time[inp_oid]} seconds")
+        print(
+            f"Prediction {inp_oid} took {time.time() - oid_start_time[inp_oid]} seconds"
+        )
 
         pred = int(resp_dict["prediction"])
         label = int(oid_to_label[inp_oid])

@@ -72,7 +72,7 @@ def _find_free_port_above_10000() -> int:
 
 
 def _get_host() -> str:
-    return os.environ['HOST_ADDR']
+    return os.environ["HOST_ADDR"]
 
 
 def send_ping_to_url(url):
