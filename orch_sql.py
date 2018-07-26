@@ -3,8 +3,8 @@ Purpose of this script is to show that the eventually we will be
 checking aginst a database. 
 """
 
-import sqlite3
 import logging
+import sqlite3
 from typing import Union
 
 models_to_image = [("mnist", "simonmok/scalabel-mnist")]
@@ -48,4 +48,3 @@ if __name__ == "__main__":
 
     conn.commit()
     conn.close()
-

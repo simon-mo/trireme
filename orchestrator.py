@@ -1,14 +1,16 @@
-from flask import Flask, request, jsonify
-from gpustat import GPUStatCollection
-from subprocess import call
+import socket
 import sqlite3
+import time
+from subprocess import call
+from typing import Tuple, Union
+
 import docker
 import jsonschema
-from typing import Tuple, Union
-import socket
+from flask import Flask, jsonify, request
+from gpustat import GPUStatCollection
+from websocket import create_connection
+
 from orch_sql import get_image_from_model
-import websockets
-import asyncio
 
 # Global Objects
 app = Flask(__name__)
@@ -17,7 +19,7 @@ docker_client_high_level = docker.from_env()
 docker_client_low_level = docker.APIClient(base_url="unix://var/run/docker.sock")
 
 # Constants
-RETRIE_TIMES = 5
+MAX_RETRIE_TIMES = 5
 RETRY_SLEEP_INTERVAL_SEC = 1
 
 # JSON Schema
@@ -72,27 +74,23 @@ def _get_host() -> str:
     return socket.getfqdn()
 
 
-async def send_ping_to_url(url):
-    async with websockets.connect(url) as websocket:
-        pong_waitable = websocket.ping(data="ping")
-        await pong_waitable
-
-
-async def keep_sending_ping(url, retries, sleep_sec):
-    count = 0
-    while count < retries:
-        try:
-            await send_ping_to_url(url)
-            break
-        except Exception:
-            count += 1
-            await asyncio.sleep(sleep_sec)
+def send_ping_to_url(url):
+    ws = create_connection(url)
+    ws.send("ping")
+    ws.recv()
+    ws.close()
 
 
 def check_service_exists(url):
-    asyncio.get_event_loop().run_until_complete(
-        keep_sending_ping(url, retries=RETRIE_TIMES, sleep_sec=RETRY_SLEEP_INTERVAL_SEC)
-    )
+    retry_count = 0
+    while retry_count < MAX_RETRIE_TIMES:
+        try:
+            send_ping_to_url(url)
+            return True
+        except:
+            retry_count += 1
+            time.sleep(RETRY_SLEEP_INTERVAL_SEC)
+    return False
 
 
 # Return
@@ -155,11 +153,18 @@ def add_model():
         port = list(port_info.values())[0][0]["HostPort"]
         ws_port = int(port)
     ws_url = f"ws://{host}:{ws_port}"
-    check_service_exists(ws_url)
 
-    return {"success": True, "wsAddr": ws_url}
+    service_healthy = check_service_exists(ws_url)
+    if not service_healthy:
+        return jsonify(
+            {
+                "success": False,
+                "reason": "Can't launch trireme docker image, health check failed.",
+            }
+        )
+
+    return jsonify({"success": True, "wsAddr": ws_url})
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="9999", debug=True)
-

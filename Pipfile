@@ -19,9 +19,12 @@ numpy = "*"
 jsonschema = "*"
 docker = "*"
 trio = "*"
+websocket-client = "*"
 
 
 [dev-packages]
 
 pylint = "*"
 black = "*"
+cached-property = "*"
+rope = "*"
