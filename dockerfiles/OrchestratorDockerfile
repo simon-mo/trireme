@@ -1,7 +1,4 @@
-ARG HOST_ADDR
 FROM nvidia/cuda
-
-ENV HOST_ADDR $HOST_ADDR
 
 ## From http://pythonwise.blogspot.com/2015/04/docker-miniconda-perfect-match.html
 # System packages 
