@@ -1,5 +1,9 @@
 import redis
 import json
+import requests
+from PIL import Image
+from io import BytesIO
+import numpy as np
 
 
 class JsonLoadsActor:
@@ -17,6 +21,24 @@ class JsonDumpsActor:
     async def __call__(self, input_batch):
         return [json.dumps(inp) for inp in input_batch]
 
+class ImageDownloaderActor:
+    def __init__(self):
+        pass
+    
+    async def __call__(self, input_batch):
+        imgs = []
+        for inp in input_batch:
+            if 'input' in inp:
+                imgs.append(inp)
+                continue
+            
+            url = inp['object id']
+            resp = requests.get(url)
+            img = Image.open(BytesIO(resp.content))
+            img = img.resize((32,32))
+            inp['input'] = img
+            imgs.append(inp)
+        return imgs
 
 class RedisDownloaderActor:
     def __init__(self):

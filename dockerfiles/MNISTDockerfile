@@ -1,0 +1,15 @@
+FROM python:3.6
+
+WORKDIR /usr/src/app
+
+RUN pip install pipenv
+
+COPY Pipfile Pipfile.lock ./
+
+RUN pipenv install --system --deploy
+
+COPY . .
+
+EXPOSE 8765
+
+CMD ["python", "./app.py"]

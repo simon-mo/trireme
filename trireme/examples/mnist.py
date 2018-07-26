@@ -75,10 +75,10 @@ class MnistTrainActor:
                     cancel_batch.append(inp)
 
         batch_info = f"""
-        Cancel {len(cancel_batch)};
-        Re-forward {len(re_forward_batch)};
-        Backward {len(backward_batch)};
-        Forward {len(new_forward_batch)}"""
+            Cancel {len(cancel_batch)};
+            Re-forward {len(re_forward_batch)};
+            Backward {len(backward_batch)};
+            Forward {len(new_forward_batch)}"""
         logger.info(f"MNIST NN is processing {batch_info}")
 
         self._handle_cancel(cancel_batch)
@@ -132,13 +132,13 @@ class MnistTrainActor:
         # Convert to tensors
         tensors = []
         for inp in input_batch:
-            bytes_input = inp["input"]
+            pil_img = inp["input"]
 
             # The following input processing step can go into:
             # - downloader
             # - another middleware
             # - trainer
-            np_input = np.frombuffer(bytes_input, dtype=np.float32).reshape(1, 32, 32)
+            np_input = np.array(pil_img, dtype=np.float32).reshape(1, 32, 32)
             tensor = torch.Tensor(np_input)
             tensor = tensor.unsqueeze(0)
             tensors.append(tensor)

@@ -8,6 +8,10 @@ name = "pypi"
 [packages]
 
 websockets = "*"
+flask = "*"
+gpustat = "*"
+pillow = "*"
+requests = "*"
 
 
 [dev-packages]
