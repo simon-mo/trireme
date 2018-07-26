@@ -106,7 +106,7 @@ async def feedback_queue_consumer(websocket):
 
 
 async def main():
-    async with websockets.connect("ws://localhost:8765/") as websocket:
+    async with websockets.connect("ws://blaze.millennium.berkeley.edu:44983" or "ws://localhost:8765/") as websocket:
         asyncio.ensure_future(feedback_queue_consumer(websocket))
         asyncio.ensure_future(infer_response_consumer(websocket))
         asyncio.ensure_future(infer_request_producer(websocket))
