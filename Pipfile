@@ -16,6 +16,9 @@ torchvision = "*"
 torch = "*"
 redis = "*"
 numpy = "*"
+jsonschema = "*"
+docker = "*"
+
 
 [dev-packages]
 
