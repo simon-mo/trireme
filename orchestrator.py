@@ -8,7 +8,7 @@ from typing import Tuple, Union
 import socket
 from orch_sql import get_image_from_model
 import websockets
-import trio
+import asyncio
 
 # Global Objects
 app = Flask(__name__)
@@ -86,12 +86,12 @@ async def keep_sending_ping(url, retries, sleep_sec):
             break
         except Exception:
             count += 1
-            trio.sleep(sleep_sec)
+            await asyncio.sleep(sleep_sec)
 
 
 def check_service_exists(url):
-    trio.run(
-        send_ping_to_url(url, retries=RETRIE_TIMES, sleep_sec=RETRY_SLEEP_INTERVAL_SEC)
+    asyncio.get_event_loop().run_until_complete(
+        keep_sending_ping(url, retries=RETRIE_TIMES, sleep_sec=RETRY_SLEEP_INTERVAL_SEC)
     )
 
 
@@ -155,10 +155,11 @@ def add_model():
         port = list(port_info.values())[0][0]["HostPort"]
         ws_port = int(port)
     ws_url = f"ws://{host}:{ws_port}"
+    check_service_exists(ws_url)
 
     return {"success": True, "wsAddr": ws_url}
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="9999", threaded=True, debug=True)
+    app.run(host="0.0.0.0", port="9999", debug=True)
 
