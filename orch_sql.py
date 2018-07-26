@@ -12,6 +12,7 @@ models_to_image = [("mnist", "simonmok/scalabel-mnist")]
 
 def get_image_from_model(model_name: str) -> Union[None, str]:
     conn = sqlite3.connect("model.db")
+    c = conn.cursor()
     c.execute(
         """
     SELECT image FROM models WHERE name=?""",
