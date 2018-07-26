@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 async def consumer_handler_factory(websocket, path, req_queue):
     while True:
         message = await websocket.recv()
+        if message == 'ping':
+            await websocket.pong()
         # logging.info(f"\nReceived Input {message}")
         await req_queue.put(message)
 

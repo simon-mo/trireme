@@ -7,6 +7,7 @@ import jsonschema
 from typing import Tuple, Union
 import socket
 from orch_sql import get_image_from_model
+import websockets
 
 # Global Objects
 app = Flask(__name__)
@@ -66,7 +67,11 @@ def _find_free_port_above_10000() -> int:
 def _get_host() -> str:
     return socket.getfqdn()
 
-
+async def check_ws_addr(url):
+    try:
+    async with websockets.connect(url) as websocket:
+        pong_waitable = websocket.ping(data='ping')
+        await pong_waitable
 # Return
 # {
 #   'success': True,
@@ -104,7 +109,7 @@ def add_model():
 
     host = _get_host()
 
-    running_models = docker_client_high_level.container.list(
+    running_models = docker_client_high_level.containers.list(
         filters={"label": f"ai.scalabel.model={model_name}"}
     )
     if len(running_models) == 0:
@@ -115,6 +120,7 @@ def add_model():
             environment={"CUDA_VISIBLE_DEVICES": cuda_str},
             ports={"8765": ws_port},
             labels={"ai.scalabel.model": model_name},
+            detach=True
         )
     else:
         container = running_models[0]
