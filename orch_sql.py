@@ -1,6 +1,6 @@
 """
-Purpose of this script is to show that the eventually we will be 
-checking aginst a database. 
+Purpose of this script is to show that the eventually we will be
+checking aginst a database.
 """
 
 import logging

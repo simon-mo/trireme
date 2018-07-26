@@ -1,22 +1,21 @@
 """
 This demo work as follows:
 - infer_request_producer will start sending a inference request every 0-2 seconds
-- infer_response_consumer will listen to the websocket and receive prediction. If the prediction 
+- infer_response_consumer will listen to the websocket and receive prediction. If the prediction
   matches our label, it will put a cancellation request in the queue; else, it will put a training
   request with the correct label in the queue.
 - last_request_handler will consume the third request queue
 """
 
 import asyncio
-import websockets
-import torch
-from torchvision import transforms, datasets
-import json
-import numpy as np
-import redis
 import hashlib
+import json
 import sys
 import time
+
+import redis
+import websockets
+from torchvision import datasets, transforms
 
 feedback_queue = asyncio.Queue(maxsize=10000)
 oid_to_label = {}

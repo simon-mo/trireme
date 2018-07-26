@@ -4,12 +4,13 @@ Provide get_server method to establish a basic connection
 
 
 import asyncio
-import websockets
+import logging
 from functools import partial
+
+import websockets
 
 QUEUE_MAX_SIZE = 10000
 
-import logging
 
 logger = logging.getLogger(__name__)
 

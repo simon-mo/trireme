@@ -1,10 +1,10 @@
 import asyncio
-from trireme.server import get_server
-from trireme.pipe import Pipe, pipe_factory
+import logging
+
 from trireme.examples.mnist import MnistTrainActor
 from trireme.middlewares import ImageDownloaderActor, JsonDumpsActor, JsonLoadsActor
-
-import logging
+from trireme.pipe import Pipe
+from trireme.server import get_server
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s"

@@ -1,6 +1,7 @@
 import asyncio
-from .server import get_server, QUEUE_MAX_SIZE
 from functools import partial
+
+from .server import QUEUE_MAX_SIZE
 
 
 def sanitize_batch(batch):

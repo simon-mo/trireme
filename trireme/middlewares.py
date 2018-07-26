@@ -1,9 +1,9 @@
-import redis
 import json
+from io import BytesIO
+
+import redis
 import requests
 from PIL import Image
-from io import BytesIO
-import numpy as np
 
 
 class JsonLoadsActor:
@@ -61,7 +61,7 @@ class RedisDownloaderActor:
             redis_key = oid.replace("redis://", "")
 
             retrieved_input = self.r.get(redis_key)
-            if retrieved_input == None:
+            if retrieved_input is None:
                 raise Exception(redis_key + " not found in redis")
             inp["input"] = retrieved_input
             mutated.append(inp)

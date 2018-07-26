@@ -1,9 +1,8 @@
+import os
 import socket
 import sqlite3
 import time
-from subprocess import call
 from typing import Tuple, Union
-import os
 
 import docker
 import jsonschema
@@ -55,7 +54,8 @@ def gpu_stats():
     return jsonify(d)
 
 
-# From https://stackoverflow.com/questions/2838244/get-open-tcp-port-in-python/2838309#2838309
+# From
+# https://stackoverflow.com/questions/2838244/get-open-tcp-port-in-python/2838309#2838309
 def _find_free_port() -> int:
     s = socket.socket()
     s.bind(("", 0))  # Bind to a free port provided by the host.
@@ -87,7 +87,7 @@ def check_service_exists(url):
         try:
             send_ping_to_url(url)
             return True
-        except:
+        except BaseException:
             retry_count += 1
             time.sleep(RETRY_SLEEP_INTERVAL_SEC)
     return False

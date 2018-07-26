@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3e83854b30add95a1ef94d39a01caf0212a909c841b651c3727443e2b4a2e0aa"
+            "sha256": "d6816268e93de9bc00dbfbd08f377361c1d1344991067c60be341bc8d1f6b35a"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -393,6 +393,12 @@
             ],
             "version": "==18.1.0"
         },
+        "autoflake": {
+            "hashes": [
+                "sha256:c103e63466f11db3617167a2c68ff6a0cda35b940222920631c6eeec6b67e807"
+            ],
+            "version": "==1.2"
+        },
         "black": {
             "hashes": [
                 "sha256:4b475bbd528acce094c503a3d2dbc2d05a4075f6d0ef7d9e7514518e14cc5191",
@@ -462,6 +468,13 @@
                 "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"
             ],
             "version": "==0.6.1"
+        },
+        "pyflakes": {
+            "hashes": [
+                "sha256:f661252913bc1dbe7fcfcbf0af0db3f42ab65aabd1a6ca68fe5d466bace94dae",
+                "sha256:9a7662ec724d0120012f6e29d6248ae3727d821bba522a0e6b356eff19126a49"
+            ],
+            "version": "==2.0.0"
         },
         "pylint": {
             "hashes": [

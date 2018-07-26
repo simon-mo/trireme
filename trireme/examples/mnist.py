@@ -1,13 +1,15 @@
-# From https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
+# From
+# https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
+import asyncio
+import logging
+import sys
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-import numpy as np
-import asyncio
-import sys
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +165,7 @@ class MnistTrainActor:
 
 
 if __name__ == "__main__":
-    """Sanity Check to make sure the network is working. 
+    """Sanity Check to make sure the network is working.
        For real server example, see test.py
     """
 
