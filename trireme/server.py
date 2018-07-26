@@ -19,6 +19,7 @@ async def consumer_handler_factory(websocket, path, req_queue):
         message = await websocket.recv()
         if message == 'ping':
             await websocket.pong()
+            continue
         # logging.info(f"\nReceived Input {message}")
         await req_queue.put(message)
 
@@ -46,7 +47,7 @@ async def connection_handler_factory(
 
 
 def get_server(
-    ip="localhost",
+    ip="0.0.0.0",
     port=8765,
     req_queue=None,
     resq_queue=None,

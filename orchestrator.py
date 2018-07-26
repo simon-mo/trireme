@@ -3,6 +3,7 @@ import sqlite3
 import time
 from subprocess import call
 from typing import Tuple, Union
+import os
 
 import docker
 import jsonschema
@@ -71,13 +72,12 @@ def _find_free_port_above_10000() -> int:
 
 
 def _get_host() -> str:
-    return socket.getfqdn()
+    return os.environ['HOST_ADDR']
 
 
 def send_ping_to_url(url):
     ws = create_connection(url)
     ws.send("ping")
-    ws.recv()
     ws.close()
 
 
@@ -159,7 +159,7 @@ def add_model():
         return jsonify(
             {
                 "success": False,
-                "reason": "Can't launch trireme docker image, health check failed.",
+                "reason": f"Can't launch trireme docker image, Health check to {ws_url} failed.",
             }
         )
 
