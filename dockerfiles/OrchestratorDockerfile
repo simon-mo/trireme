@@ -1,17 +1,18 @@
 FROM nvidia/cuda
 
-RUN apt-get update 
+## From http://pythonwise.blogspot.com/2015/04/docker-miniconda-perfect-match.html
+# System packages 
+RUN apt-get update && apt-get install -y curl
 
-# From https://docs.python-guide.org/starting/install3/linux/
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get update
-RUN apt-get install -y python3.6
-RUN apt-get install -y python3-pip
+
+# Install miniconda to /miniconda
+RUN curl -LO http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN bash Miniconda3-latest-Linux-x86_64.sh -p /miniconda -b
+ENV PATH=/miniconda/bin:${PATH}
 
 WORKDIR /usr/src/app
 
-RUN pip3 install pipenv
+RUN pip install pipenv
 
 COPY Pipfile Pipfile.lock ./
 
@@ -19,11 +20,14 @@ COPY Pipfile Pipfile.lock ./
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-
 RUN pipenv install --system --deploy
 
 COPY . .
 
 EXPOSE 9999
 
-CMD ["python3", "./orchestrator.py"]
+# Build the db
+
+RUN python ./orch_sql.py
+
+CMD ["python", "./orchestrator.py"]
