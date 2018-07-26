@@ -14,10 +14,10 @@ pillow = "*"
 requests = "*"
 torchvision = "*"
 torch = "*"
-black = "*"
 redis = "*"
 numpy = "*"
 
 [dev-packages]
 
 pylint = "*"
+black = "*"
