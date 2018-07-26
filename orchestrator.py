@@ -76,7 +76,7 @@ def _get_host() -> str:
 #   'success': False,
 #   'reason': "Json invalid, missing field name..."
 # }
-@app.route("/add", methods=["POST"])
+@app.route("/add_model", methods=["POST"])
 def add_model():
     info = request.json
 
