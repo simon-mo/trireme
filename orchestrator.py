@@ -8,6 +8,7 @@ from typing import Tuple, Union
 import socket
 from orch_sql import get_image_from_model
 import websockets
+import trio
 
 # Global Objects
 app = Flask(__name__)
@@ -15,6 +16,9 @@ conn = sqlite3.connect("models.db")
 docker_client_high_level = docker.from_env()
 docker_client_low_level = docker.APIClient(base_url="unix://var/run/docker.sock")
 
+# Constants
+RETRIE_TIMES = 5
+RETRY_SLEEP_INTERVAL_SEC = 1
 
 # JSON Schema
 
@@ -67,11 +71,30 @@ def _find_free_port_above_10000() -> int:
 def _get_host() -> str:
     return socket.getfqdn()
 
-async def check_ws_addr(url):
-    try:
+
+async def send_ping_to_url(url):
     async with websockets.connect(url) as websocket:
-        pong_waitable = websocket.ping(data='ping')
+        pong_waitable = websocket.ping(data="ping")
         await pong_waitable
+
+
+async def keep_sending_ping(url, retries, sleep_sec):
+    count = 0
+    while count < retries:
+        try:
+            await send_ping_to_url(url)
+            break
+        except Exception:
+            count += 1
+            trio.sleep(sleep_sec)
+
+
+def check_service_exists(url):
+    trio.run(
+        send_ping_to_url(url, retries=RETRIE_TIMES, sleep_sec=RETRY_SLEEP_INTERVAL_SEC)
+    )
+
+
 # Return
 # {
 #   'success': True,
@@ -120,7 +143,7 @@ def add_model():
             environment={"CUDA_VISIBLE_DEVICES": cuda_str},
             ports={"8765": ws_port},
             labels={"ai.scalabel.model": model_name},
-            detach=True
+            detach=True,
         )
     else:
         container = running_models[0]

@@ -18,6 +18,7 @@ redis = "*"
 numpy = "*"
 jsonschema = "*"
 docker = "*"
+trio = "*"
 
 
 [dev-packages]
