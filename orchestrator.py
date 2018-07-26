@@ -1,18 +1,19 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from gpustat import GPUStatCollection
 from subprocess import call
 
 app = Flask(__name__)
 
 
-@app.route("/gpu")
+@app.route("/gpustat")
 def gpu_stats():
-    return GPUStatCollection.new_query().jsonify()
+    d = GPUStatCollection.new_query().jsonify()
+    return jsonify(d)
 
 
 @app.route("/add", methods=["POST"])
 def add_model():
-    info = request.json()
+    info = request.json
     cmd = [
         "docker",
         "run",
@@ -20,13 +21,13 @@ def add_model():
         "-d",
         "-p",
         "9998:8765",
-        "simonmok/scalabel-mnist",
         "-e",
-        f"CUDA_VISIBLE_DEVICES={','.join(info[gpu])}",
+        "CUDA_VISIBLE_DEVICES={}".format(','.join(info['gpu'])),
+        "simonmok/scalabel-mnist",
     ]
-    print(f"Processing {cmd}")
+    print("Processing", "cmd")
     proc = call(cmd)
-    return proc
+    return 'ws://localhost:9998'
 
 
 app.run(host="0.0.0.0", port="9999", threaded=True, debug=True)
