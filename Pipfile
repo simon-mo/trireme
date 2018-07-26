@@ -12,13 +12,12 @@ flask = "*"
 gpustat = "*"
 pillow = "*"
 requests = "*"
-
-
-[dev-packages]
-
-pylint = "*"
+torchvision = "*"
 torch = "*"
 black = "*"
 redis = "*"
 numpy = "*"
-torchvision = "*"
+
+[dev-packages]
+
+pylint = "*"
