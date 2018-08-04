@@ -7,7 +7,8 @@ import logging
 import sqlite3
 from typing import Union
 
-models_to_image = [("mnist", "simonmok/scalabel-mnist")]
+models_to_image = [("mnist", "simonmok/scalabel-mnist"),
+                   ("yoloV3", "chengruizhe/scalabel-yolov3")]
 
 
 def get_image_from_model(model_name: str) -> Union[None, str]:
@@ -29,7 +30,6 @@ def get_image_from_model(model_name: str) -> Union[None, str]:
 if __name__ == "__main__":
 
     conn = sqlite3.connect("model.db")
-
     logging.info("Creating models table.")
     c = conn.cursor()
     c.execute(

@@ -1,0 +1,29 @@
+FROM nvidia/cuda
+
+## From http://pythonwise.blogspot.com/2015/04/docker-miniconda-perfect-match.html
+# System packages
+RUN apt-get update && apt-get install -y curl
+
+
+# Install miniconda to /miniconda
+RUN curl -LO http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN bash Miniconda3-latest-Linux-x86_64.sh -p /miniconda -b
+ENV PATH=/miniconda/bin:${PATH}
+
+WORKDIR /usr/src/app
+
+RUN pip install pipenv
+
+COPY Pipfile Pipfile.lock ./
+
+# Install libgtk for cv2
+RUN apt-get install -y libgtk2.0-dev
+
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+RUN pipenv install --system --deploy
+
+COPY . .
+
+CMD ["python", "./app_yolo.py"]

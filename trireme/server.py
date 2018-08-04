@@ -22,6 +22,7 @@ async def consumer_handler_factory(websocket, path, req_queue):
             await websocket.pong()
             continue
         # logging.info(f"\nReceived Input {message}")
+        print(f"\nReceived Input {message}")
         await req_queue.put(message)
 
 
@@ -29,6 +30,7 @@ async def producer_handler_factory(websocket, path, resp_queue):
     while True:
         message = await resp_queue.get()
         # logging.info(f"Sending Output {message}\n")
+        print(f"Sending out message{message}\n")
         await websocket.send(message)
 
 

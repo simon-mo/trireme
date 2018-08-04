@@ -17,6 +17,7 @@ from tensorboardX import SummaryWriter
 from .model.YOLOv3_PyTorch.nets.model_main import ModelMain
 from .model.YOLOv3_PyTorch.nets.yolo_loss import YOLOLoss
 from .model.YOLOv3_PyTorch.common.sat_dataset import SatDataset
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class YoloV3TrainActor:
         config = {
             "model_params": {
                 "backbone_name": "darknet_53",
-                "backbone_pretrained": "model/YOLOv3_PyTorch/weights/darknet53_weights_pytorch.pth", #  set empty to disable
+                "backbone_pretrained": "trireme/examples/model/YOLOv3_PyTorch/weights/darknet53_weights_pytorch.pth", #  set empty to disable
             },
             "yolo": {
                 "anchors": [[[116, 90], [156, 198], [373, 326]],
@@ -252,13 +253,13 @@ class YoloV3TrainActor:
         tensors = []
         np_inputs = []
         for inp in input_batch:
-            bytes_input = inp["input"]
-
+            pil_image = inp["input"]
+            pil_image = pil_image.resize((416,416), Image.ANTIALIAS)
             # The following input processing step can go into:
             # - downloader
             # - another middleware
             # - trainer
-            np_input = np.frombuffer(bytes_input, dtype=np.float32).reshape(3, 416, 416)
+            np_input = np.array(pil_image, dtype=np.float32).reshape(3, 416, 416)
             np_inputs.append(np_input.transpose())
             tensor = torch.Tensor(np_input)
             tensor = tensor.unsqueeze(0)

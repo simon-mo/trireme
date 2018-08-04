@@ -36,7 +36,7 @@ class ImageDownloaderActor:
             url = inp["object id"]
             resp = requests.get(url)
             img = Image.open(BytesIO(resp.content))
-            img = img.resize((32, 32))
+            # img = img.resize((32, 32))
             inp["input"] = img
             imgs.append(inp)
         return imgs

@@ -12,6 +12,7 @@ import hashlib
 import json
 import sys
 import time
+import configparser
 
 import redis
 import websockets
@@ -20,7 +21,11 @@ from torchvision import datasets, transforms
 feedback_queue = asyncio.Queue(maxsize=10000)
 oid_to_label = {}
 
-r = redis.Redis()
+config = configparser.ConfigParser()
+config.read("trireme.conf")
+pw = config["Redis"]["password"]
+
+r = redis.Redis(password = pw)
 
 oid_start_time = {}
 

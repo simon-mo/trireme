@@ -78,6 +78,7 @@ def _get_host() -> str:
 def send_ping_to_url(url):
     ws = create_connection(url)
     ws.send("ping")
+    print("ping sent!!!")
     ws.close()
 
 
@@ -105,9 +106,10 @@ def check_service_exists(url):
 @app.route("/add_model", methods=["POST"])
 def add_model():
     info = request.json
-
+    print(info)
     # Check for json schema
     is_valid, msg = _validate_add_model_json(info)
+    print("This json is Valid?", is_valid)
     if not is_valid:
         return jsonify({"success": False, "reason": msg})
 
@@ -135,6 +137,7 @@ def add_model():
     )
     if len(running_models) == 0:
         ws_port = _find_free_port_above_10000()
+        print('port found', ws_port)
         docker_client_high_level.containers.run(
             image=image_name,
             runtime="nvidia",
@@ -143,6 +146,8 @@ def add_model():
             labels={"ai.scalabel.model": model_name},
             detach=True,
         )
+        print(check_service_exists(f"ws://{host}:{ws_port}"))
+        print(docker_client_high_level.containers.list())
     else:
         container = running_models[0]
         port_info = docker_client_low_level.inspect_container(container.id)[
@@ -156,6 +161,7 @@ def add_model():
 
     service_healthy = check_service_exists(ws_url)
     if not service_healthy:
+
         return jsonify(
             {
                 "success": False,
@@ -168,3 +174,4 @@ def add_model():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="9999", debug=True)
+    print("Running server on port 9999")
