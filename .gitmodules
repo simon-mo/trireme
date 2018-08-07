@@ -1,0 +1,3 @@
+[submodule "trireme/examples/model/pytorch-yolo-v3"]
+	path = trireme/examples/model/pytorch-yolo-v3
+	url = https://github.com/ayooshkathuria/pytorch-yolo-v3.git
