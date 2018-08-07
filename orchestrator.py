@@ -76,9 +76,8 @@ def _get_host() -> str:
 
 
 def send_ping_to_url(url):
-    ws = create_connection(url)
+    ws = create_connection(url, timeout=5)
     ws.send("ping")
-    print("ping sent!!!")
     ws.close()
 
 
@@ -146,8 +145,6 @@ def add_model():
             labels={"ai.scalabel.model": model_name},
             detach=True,
         )
-        print(check_service_exists(f"ws://{host}:{ws_port}"))
-        print(docker_client_high_level.containers.list())
     else:
         container = running_models[0]
         port_info = docker_client_low_level.inspect_container(container.id)[
